@@ -156,10 +156,54 @@ var nf=new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
 var F=function(n){var v=Math.round(n);if(!isFinite(v))return '0';if(v===0)v=0;return nf.format(v)};
 var MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 var items=[],log=[],S={},rows=[{s:'',c:'',q:''}],editId=null,mode='unit',openSell=null,showRep=false,delArm=null,undoArm=null,qry='',flt='all',sv='r',sq='',xp=[],curImg='',curBig=null,qsel=null,qty={},rg='m',retArm=null,CU={},cdet=null;
+// ---- IndexedDB photo store (v7) ----
+var idb=null,idbReady=false,phSaved={},phBusy=false,phAgain=false;
+function stripImg(it){if(it&&it.img&&phSaved[String(it.id)]===it.img){var c={};for(var k in it)if(k!=='img')c[k]=it[k];return c}return it}
+function persist2(){try{localStorage.setItem('fc2_items',JSON.stringify(items.map(stripImg)))}catch(e){}}
+function idbOpen(cb){try{var r=indexedDB.open('mahkids',1);r.onupgradeneeded=function(){var d=r.result;if(!d.objectStoreNames.contains('photos'))d.createObjectStore('photos')};r.onsuccess=function(){idb=r.result;cb(true)};r.onerror=function(){cb(false)};r.onblocked=function(){cb(false)}}catch(e){cb(false)}}
+function idbSync(){
+  if(!idb||!idbReady)return;
+  if(phBusy){phAgain=true;return}
+  var todo=items.filter(function(x){return x.img&&phSaved[String(x.id)]!==x.img}),ids={},del=[];
+  items.forEach(function(x){ids[String(x.id)]=1;if(!x.img&&phSaved[String(x.id)]!==undefined)del.push(String(x.id))});
+  if(items.length)Object.keys(phSaved).forEach(function(k){if(!ids[k]&&del.indexOf(k)<0)del.push(k)});
+  if(!todo.length&&!del.length)return;
+  phBusy=true;
+  try{
+    var tx=idb.transaction('photos','readwrite'),st=tx.objectStore('photos');
+    todo.forEach(function(x){st.put(x.img,String(x.id))});
+    del.forEach(function(k){st.delete(k)});
+    tx.oncomplete=function(){
+      todo.forEach(function(x){phSaved[String(x.id)]=x.img});
+      del.forEach(function(k){delete phSaved[k]});
+      phBusy=false;
+      if(todo.length)persist2();
+      if(phAgain){phAgain=false;idbSync()}
+    };
+    tx.onerror=tx.onabort=function(){phBusy=false};
+  }catch(e){phBusy=false}
+}
+function idbLoad(){
+  idbOpen(function(ok){
+    if(!ok)return;
+    try{
+      var tx=idb.transaction('photos','readonly'),rq=tx.objectStore('photos').openCursor(),got={};
+      rq.onsuccess=function(){var c=rq.result;if(c){got[String(c.key)]=c.value;c.continue()}};
+      tx.oncomplete=function(){
+        items.forEach(function(x){var k=String(x.id);if(!x.img&&got[k])x.img=got[k]});
+        Object.keys(got).forEach(function(k){phSaved[k]=got[k]});
+        idbReady=true;render();idbSync();
+      };
+      tx.onerror=tx.onabort=function(){};
+    }catch(e){}
+  });
+}
+function phInfo(){var e=$('bc');if(!e)return;var n=items.filter(function(x){return x.img}).length;e.textContent+=' \u2022 '+n+' \u0639\u06a9\u0633'}
+
 
 function ld(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v}catch(e){return d}}
 function toast(m,bad){var e=$('toast');e.textContent=m;e.className='show'+(bad?' bad':'');clearTimeout(toast.t);toast.t=setTimeout(function(){e.className=''},bad?6000:2200)}
-function persist(){try{localStorage.setItem('fc2_items',JSON.stringify(items));localStorage.setItem('fc2_log',JSON.stringify(log));localStorage.setItem('fc2_exp',JSON.stringify(xp));localStorage.setItem('fc2_cust',JSON.stringify(CU));return true}catch(e){toast('ذخیره نشد! حافظه مرورگر پر یا غیرفعال است. همین حالا پشتیبان بگیر.',1);return false}}
+function persist(){try{idbSync();localStorage.setItem('fc2_items',JSON.stringify(items.map(stripImg)));localStorage.setItem('fc2_log',JSON.stringify(log));localStorage.setItem('fc2_exp',JSON.stringify(xp));localStorage.setItem('fc2_cust',JSON.stringify(CU));return true}catch(e){toast('ذخیره نشد! حافظه مرورگر پر یا غیرفعال است. همین حالا پشتیبان بگیر.',1);return false}}
 function lat(s){return String(s==null?'':s).replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).replace(/٫/g,'.').replace(/٬/g,',')}
 function num(s){
   s=String(s||'').replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)})
@@ -615,7 +659,7 @@ $('ex3').onclick=function(){var R=[['تاریخ','نوع','مبلغ','توضیح
 
 // ---- پشتیبان ----
 function bm(t,ok){var e=$('bm');e.textContent=t;e.style.color=ok?'var(--accent)':'var(--warn)'}
-function renderB(){$('bc').textContent=items.length+' محصول • '+log.length+' فروش • '+xp.length+' هزینه ثبت‌شده';$('sl').value=thr();$('sw').value=stW();renderCh();pst();bl()}
+function renderB(){$('bc').textContent=items.length+' محصول • '+log.length+' فروش • '+xp.length+' هزینه ثبت‌شده';$('sl').value=thr();$('sw').value=stW();renderCh();pst();bl();phInfo()}
 function mkBackup(){return JSON.stringify({v:6,items:items,log:log,exp:xp,cust:CU,set:S})}
 function bname(){return 'backup-'+todayStr().replace(/\//g,'-')+'.json'}
 function markBackup(){S.lb=Date.now();saveS();bkWarn();var e=$('bl');if(e)bl()}
@@ -652,7 +696,7 @@ $('rf').onchange=function(){
 };
 function pst(){try{if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().then(function(g){$('ps').textContent=g?'ذخیره‌سازی دائمی فعال است و مرورگر داده‌ها را خودکار پاک نمی‌کند.':'ذخیره‌سازی دائمی هنوز تأیید نشده. بعد از نصب برنامه و چند بار استفاده فعال می‌شود؛ تا آن موقع پشتیبان بگیر.'})}}catch(e){}}
 pst();
-clearForm();render();bkWarn();
+clearForm();render();bkWarn();idbLoad();
 if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
 })();
 </script>
