@@ -4,11 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="color-scheme" content="light dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mahkids">
 <meta name="theme-color" content="#0f7b5f">
 <title>Mahkids Assist</title>
 <style>
+@font-face{font-family:Vazirmatn;src:url(fonts/Vazirmatn-var.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
 :root{--bg:#f6f5f1;--card:#fff;--text:#1d2320;--muted:#6b746f;--accent:#0f7b5f;--soft:#e1f2ec;--border:#e2e0d8;--warn:#b3402a;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#121715;--card:#1b2220;--text:#eef2ef;--muted:#98a39d;--accent:#3fc59b;--soft:#1d3a30;--border:#2c3632;--warn:#f08a74}}
@@ -183,9 +188,18 @@ button.p{border-radius:16px;padding:14px;font-size:17px;background:var(--text);b
 .rk{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}.rk:last-child{border:0;padding-bottom:2px}
 .rk i{width:26px;height:26px;border-radius:9px;background:var(--soft);color:var(--accent);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px}
 .rk span{flex:1}
+
+/* ===== v13 ===== */
+#sb{position:sticky;top:0;z-index:60}
+.sbar{display:flex;align-items:center;justify-content:center;gap:10px;padding:7px 14px;font-size:13.5px;font-weight:600;text-align:center;line-height:1.7}
+.sbar.off{background:#3b4440;color:#fff}.sbar.off.ok{background:var(--accent)}
+.sbar.upd{background:var(--text);color:var(--bg)}
+.sbar button{border:0;border-radius:10px;padding:4px 14px;font-size:13px;font-weight:700;background:var(--accent);color:#fff;flex:none}
+.btns.stk{position:sticky;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:30;margin-top:14px;padding:18px 0 4px;background:linear-gradient(to top,var(--card) 62%,rgba(0,0,0,0))}
 </style>
 </head>
 <body>
+<div id="sb"><div class="sbar off" id="offb" role="status" aria-live="polite" hidden><span id="offt"></span></div><div class="sbar upd" id="updb" role="status" aria-live="polite" hidden><span>نسخهٔ جدید برنامه آماده است.</span><button type="button" id="updgo">بازنشانی</button></div></div>
 <main>
 <h1 class="brand"><img src="icon-192.png" alt="" width="36" height="36"><span dir="ltr">Mahkids Assist</span></h1>
 <div class="ph"><h2 id="pt"></h2><div id="pd"></div></div>
@@ -219,7 +233,7 @@ button.p{border-radius:16px;padding:14px;font-size:17px;background:var(--text);b
   </div>
   <div id="out"></div>
   <div class="err" id="msg"></div>
-  <div class="btns"><button class="p" id="save" type="button">ذخیره محصول</button><button id="reset" type="button">جدید</button></div>
+  <div class="btns stk"><button class="p" id="save" type="button">ذخیره محصول</button><button id="reset" type="button">جدید</button></div>
 </div>
 </div>
 
@@ -257,7 +271,7 @@ button.p{border-radius:16px;padding:14px;font-size:17px;background:var(--text);b
 </div>
 
 <div id="tabB" hidden>
-<div class="card"><h2>ظاهر و نسخه</h2><div class="btns" style="margin-top:0"><button id="th0" type="button">خودکار</button><button id="th1" type="button">روشن</button><button id="th2" type="button">تاریک</button></div><div class="tq">نسخه برنامه: ۱۲</div></div>
+<div class="card"><h2>ظاهر و نسخه</h2><div class="btns" style="margin-top:0"><button id="th0" type="button">خودکار</button><button id="th1" type="button">روشن</button><button id="th2" type="button">تاریک</button></div><div class="tq">نسخه برنامه: ۱۳</div><div class="tq" id="ofs"></div><div class="tq" id="fns"></div></div>
 <div class="card"><h2>تنظیمات</h2>
 <div class="g"><div><label for="sl">هشدار موجودی کم (تعداد)</label><input id="sl" class="n" inputmode="numeric"></div><div><label for="sw">ماندگار بعد از (هفته)</label><input id="sw" class="n" inputmode="numeric"></div></div>
 <div class="lbl">کانال‌های فروش و کارمزد (٪). خالی = کارمزد خود محصول</div><div id="sch"></div><button type="button" id="cadd">＋ کانال جدید</button></div>
@@ -823,7 +837,7 @@ $('ex3').onclick=function(){var R=[['تاریخ','نوع','مبلغ','توضیح
 
 // ---- پشتیبان ----
 function bm(t,ok){var e=$('bm');e.textContent=t;e.style.color=ok?'var(--accent)':'var(--warn)'}
-function renderB(){$('bc').textContent=items.length+' محصول • '+log.length+' فروش • '+xp.length+' هزینه ثبت‌شده';$('sl').value=thr();$('sw').value=stW();renderCh();pst();bl();phInfo()}
+function renderB(){$('bc').textContent=items.length+' محصول • '+log.length+' فروش • '+xp.length+' هزینه ثبت‌شده';$('sl').value=thr();$('sw').value=stW();renderCh();pst();bl();phInfo();ofl();fnt()}
 function mkBackup(){return JSON.stringify({v:6,items:items,log:log,exp:xp,cust:CU,set:S})}
 function bname(){return 'backup-'+todayStr().replace(/\//g,'-')+'.json'}
 function markBackup(){S.lb=Date.now();saveS();bkWarn();var e=$('bl');if(e)bl()}
@@ -841,7 +855,7 @@ function shareBk(){
   if(!navigator.share)return dlf('این مرورگر/آدرس اشتراک‌گذاری را پشتیبانی نمی‌کند (نیاز به HTTPS یا برنامهٔ نصب‌شده دارد).');
   try{for(i=0;i<V.length&&!f;i++){var g=new File([txt],V[i][0],{type:V[i][1]});if(!navigator.canShare||navigator.canShare({files:[g]}))f=g}}catch(e){}
   if(!f)return dlf('مرورگر اجازهٔ ارسال فایل نمی‌دهد.');
-  navigator.share({files:[f],title:'پشتیبان Mahkids'}).then(function(){markBackup();bm('پشتیبان ارسال شد.',true)}).catch(function(e){if(e&&e.name==='AbortError')return;dlf('ارسال مستقیم ناموفق بود ('+((e&&e.name)||'خطا')+').')})
+  navigator.share({files:[f],title:'پشتیبان Mahkids'}).then(function(){markBackup();bm(navigator.onLine===false?'پشتیبان به تلگرام سپرده شد؛ با وصل‌شدن اینترنت ارسال می‌شود. حتماً از رسیدنش مطمئن شو.':'پشتیبان ارسال شد.',true)}).catch(function(e){if(e&&e.name==='AbortError')return;dlf('ارسال مستقیم ناموفق بود ('+((e&&e.name)||'خطا')+').')})
 }
 $('bs').onclick=shareBk;
 $('bkgo').onclick=function(){tab('b');shareBk()};
@@ -868,7 +882,7 @@ function bsHtml(){var a=items.map(function(it){var n=0;Object.keys(it.sold||{}).
   var li=function(l){return l.map(function(x){return '<div class="rg" style="grid-template-columns:1fr auto"><span>'+esc(x[0].name)+' <span class="cd">#'+esc(x[0].code)+'</span></span><b>'+x[1]+'</b></div>'}).join('')};
   return '<div class="card"><h2>پرفروش‌ها</h2>'+li(a.slice(0,3))+'<h2 style="margin-top:12px">کم‌فروش‌ها</h2>'+li(a.slice(-3).reverse())+'</div>'}
 function drawInvoice(L){
-  var e0=L[0],W=1000,rh=56,FN='sans-serif',G='#0f7b5f',T='#1d2320',M='#6b746f';
+  var e0=L[0],W=1000,rh=56,FN='Vazirmatn,Tahoma,sans-serif',G='#0f7b5f',T='#1d2320',M='#6b746f';
   var info=[['تاریخ',lat(e0.d)],['مشتری',lat([e0.cu,e0.ph].filter(Boolean).join(' - '))||'-']];if(e0.ci)info.push(['شهر',lat(e0.ci)]);
   var H=130+info.length*40+30,tn=0,tt=0;
   L.forEach(function(e){H+=64+46+Object.keys(e.z||{}).length*rh+(e.dc?46:0)+30;tn+=e.n;tt+=e.n*e.p});
@@ -901,14 +915,40 @@ function drawInvoice(L){
 var ivSel={};
 function invoice(ids){var L=ids.map(function(id){return log.filter(function(x){return x.id===id})[0]}).filter(function(e){return e&&e.n>0});
   if(!L.length){toast('فروش قابل‌چاپ پیدا نشد.');return}
-  var c=drawInvoice(L);
+  var go=function(){var c=drawInvoice(L);
   c.toBlob(function(b){var f=new File([b],'invoice-'+lat(L[0].cd||'x')+'.png',{type:'image/png'});
     if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(function(){})}
-    else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;document.body.appendChild(a);a.click();a.remove();toast('فاکتور ذخیره شد.')}},'image/png')}
+    else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;document.body.appendChild(a);a.click();a.remove();toast('فاکتور ذخیره شد.')}},'image/png')};
+  if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('22px Vazirmatn','فاکتور'),document.fonts.load('bold 22px Vazirmatn','فاکتور')]).then(go,go)}else go()}
 function ivBar(){var n=Object.keys(ivSel).length;return n?'<div class="a" style="margin:0 0 10px"><button class="p" data-ivm="1">فاکتور مشترک ('+n+' فروش)</button><button data-ivx="1">لغو انتخاب</button></div>':''}
 function setTh(v,sv){var r=document.documentElement;if(v==='light'||v==='dark')r.setAttribute('data-theme',v);else r.removeAttribute('data-theme');if(sv){try{localStorage.setItem('fc2_th',JSON.stringify(v))}catch(e){}}}
 setTh(ld('fc2_th','auto'));
 $('th0').onclick=function(){setTh('auto',1)};$('th1').onclick=function(){setTh('light',1)};$('th2').onclick=function(){setTh('dark',1)};
+// ---- v13: وضعیت اتصال، نسخهٔ جدید، آمادگی آفلاین ----
+var sbOff=$('offb'),sbUpd=$('updb'),offT=0,wasOff=false,updShown=false;
+function sbRefresh(){$('sb').className=(!sbOff.hidden||!sbUpd.hidden)?'on':''}
+function netState(){
+  clearTimeout(offT);
+  var cn=navigator.connection||navigator.mozConnection,slow=!!(cn&&/2g$/.test(cn.effectiveType||'')),off=navigator.onLine===false;
+  if(off||slow){$('offt').textContent=off?'آفلاین هستی؛ همه‌چیز کار می‌کند و داده‌ها روی گوشی می‌ماند.':'اینترنت ضعیف است؛ برنامه بدون اینترنت هم کار می‌کند.';sbOff.className='sbar off';sbOff.hidden=false;wasOff=true}
+  else if(wasOff){wasOff=false;$('offt').textContent='اینترنت وصل شد.';sbOff.className='sbar off ok';sbOff.hidden=false;offT=setTimeout(function(){sbOff.hidden=true;sbRefresh()},2200)}
+  else sbOff.hidden=true;
+  sbRefresh()}
+window.addEventListener('offline',netState);window.addEventListener('online',netState);
+try{var cn0=navigator.connection||navigator.mozConnection;if(cn0&&cn0.addEventListener)cn0.addEventListener('change',netState)}catch(e){}
+netState();
+function showUpd(){if(updShown)return;updShown=true;sbUpd.hidden=false;sbRefresh()}
+$('updgo').onclick=function(){location.reload()};
+function ofl(){var e=$('ofs');if(!e)return;
+  if(!('serviceWorker' in navigator)||!window.caches){e.textContent='کار آفلاین: این مرورگر/آدرس پشتیبانی نمی‌کند (آدرس باید HTTPS باشد).';e.style.color='var(--warn)';return}
+  caches.keys().then(function(k){var ok=!!navigator.serviceWorker.controller&&k.some(function(x){return x.indexOf('mahkids-assist-')===0});
+    e.textContent=ok?'کار آفلاین: آماده ✓':'کار آفلاین: هنوز آماده نیست. یک بار با اینترنت باز کن و برنامه را ببند و دوباره باز کن.';e.style.color=ok?'var(--accent)':'var(--warn)'}).catch(function(){})}
+function fnt(){var e=$('fns');if(!e||!document.fonts||!document.fonts.load)return;
+  var f=function(ok){e.textContent=ok?'فونت داخلی: فعال ✓':'فونت داخلی: فایل فونت پیدا نشد (\u2066fonts/Vazirmatn-var.woff2\u2069)';e.style.color=ok?'var(--accent)':'var(--warn)'};
+  document.fonts.load('16px Vazirmatn','فارسی').then(function(l){f(!!(l&&l.length&&l[0].status==='loaded'))},function(){f(false)})}
+if("serviceWorker"in navigator){var hadCtl=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){if(hadCtl)showUpd();hadCtl=true;ofl()});
+  navigator.serviceWorker.addEventListener('message',function(e){if(e.data&&e.data.type==='UPDATED')showUpd()})}
 if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
 })();
 </script>
