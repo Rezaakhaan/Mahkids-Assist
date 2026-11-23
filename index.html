@@ -65,6 +65,7 @@ textarea{width:100%;font:inherit;font-size:16px;padding:9px 10px;border:1px soli
 .wd{font-size:12px;color:var(--muted);min-height:18px;line-height:18px;direction:rtl;text-align:right}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:12px;font-size:15px;max-width:90%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
 #toast.show{opacity:1}#toast.bad{background:var(--warn);color:#fff}
+.d,.tq,label,.lbl{font-size:15px}.cd{font-size:14px}.t{font-size:20px}button{font-size:16px}.a button{font-size:15px}.rg{font-size:17px}.rg.h{font-size:14px}.bg{font-size:13px}.chip{font-size:16px}.rg.lw b{color:var(--warn)}
 </style>
 </head>
 <body>
@@ -137,6 +138,7 @@ textarea{width:100%;font:inherit;font-size:16px;padding:9px 10px;border:1px soli
 </div>
 
 <div id="tabB" hidden>
+<div class="card"><h2>ظاهر و نسخه</h2><div class="btns" style="margin-top:0"><button id="th0" type="button">خودکار</button><button id="th1" type="button">روشن</button><button id="th2" type="button">تاریک</button></div><div class="tq">نسخه برنامه: ۱۰</div></div>
 <div class="card"><h2>تنظیمات</h2>
 <div class="g"><div><label for="sl">هشدار موجودی کم (تعداد)</label><input id="sl" class="n" inputmode="numeric"></div><div><label for="sw">ماندگار بعد از (هفته)</label><input id="sw" class="n" inputmode="numeric"></div></div>
 <div class="lbl">کانال‌های فروش و کارمزد (٪). خالی = کارمزد خود محصول</div><div id="sch"></div><button type="button" id="cadd">＋ کانال جدید</button></div>
@@ -364,7 +366,7 @@ function card(it,st){
    '<div class="d">'+esc(it.date)+' • خرید '+tot+' • موجودی <b>'+rem+'</b>'+(rem<=0?' • <b style="color:var(--warn)">تمام شد</b>':'')+'</div>'+
    '<div class="d">قیمت خرید '+F(it.pin)+(it.mode==='total'?' (کلی)':' (تکی)')+' • پست کل '+F(it.ship||0)+' • جانبی هر عدد '+F(it.extra||0)+' • سود '+esc(it.m)+'٪ • کارمزد '+esc(it.f)+'٪</div>'+
    '<div class="chips">'+chips+'</div>'+(st&&st.n?'<div class="d">فروخته: '+st.n+' • '+(st.p>=0?'سود':'زیان')+' تا الان: <b style="color:'+(st.p>=0?'var(--accent)':'var(--warn)')+'">'+F(Math.abs(st.p))+'</b></div>':'');
-  h+='<div class="a">'+(rem>0?'<button class="p" data-sell="'+id+'">فروش</button>':'')+'<button data-m="'+id+'">متن پیام</button>'+(st&&st.n?'<button data-u="'+id+'">'+(undoArm===it.id?'مطمئنی؟ دوباره بزن':'لغو آخرین فروش')+'</button>':'')+'<button data-e="'+id+'">ویرایش</button><button data-d="'+id+'">'+(delArm===it.id?'مطمئنی؟ (تاریخچه فروش می‌ماند)':'حذف')+'</button></div></div>';
+  h+='<div class="a">'+(rem>0?'<button class="p" data-sell="'+id+'">فروش</button>':'')+'<button data-cp="'+id+'">کپی</button><button data-m="'+id+'">متن پیام</button>'+(st&&st.n?'<button data-u="'+id+'">'+(undoArm===it.id?'مطمئنی؟ دوباره بزن':'لغو آخرین فروش')+'</button>':'')+'<button data-e="'+id+'">ویرایش</button><button data-d="'+id+'">'+(delArm===it.id?'مطمئنی؟ (تاریخچه فروش می‌ماند)':'حذف')+'</button></div></div>';
   return h;
 }
 function render(){
@@ -377,8 +379,8 @@ function render(){
   if(!showRep){$('rep').innerHTML='';return;}
   var t=0,o='<div class="card"><div class="rg h"><span>محصول</span><span>رنگ</span><span>سایز</span><span>موجودی</span></div>';
   items.forEach(function(it){it.sizes.forEach(function(z){var r=left(it,z);t+=r;
-    o+='<div class="rg'+(r<=0?' z':'')+'"><span>'+esc(it.name)+' <span class="cd">#'+esc(it.code)+'</span></span><span>'+esc(z.c||'-')+'</span><span>'+esc(z.s)+'</span><b>'+r+'</b></div>'})});
-  $('rep').innerHTML=o+'<div class="rg h"><b>جمع کل</b><span></span><span></span><b style="color:var(--text);font-size:18px">'+t+'</b></div></div>';
+    o+='<div class="rg'+(r<=0?' z':(r<=thr()?' lw':''))+'"><span>'+esc(it.name)+' <span class="cd">#'+esc(it.code)+'</span></span><span>'+esc(z.c||'-')+'</span><span>'+esc(z.s)+'</span><b>'+r+'</b></div>'})});
+  $('rep').innerHTML=bsHtml()+o+'<div class="rg h"><b>جمع کل</b><span></span><span></span><b style="color:var(--text);font-size:18px">'+t+'</b></div></div>';
 }
 
 $('rows').oninput=function(e){var i=e.target.getAttribute('data-i');if(i==null)return;var k=e.target.getAttribute('data-k');if(k==='q'){var l1=lat(e.target.value);if(l1!==e.target.value)e.target.value=l1}rows[i][k]=e.target.value;$('msg').textContent='';calc()};
@@ -430,6 +432,7 @@ $('list').onclick=function(e){
   if(b.getAttribute('data-d')){id=b.getAttribute('data-d');
     if(wd===id){items=items.filter(function(x){return x.id!==id});persist();delArm=null;toast('حذف شد. تاریخچه فروش در تب «فروش» می‌ماند.')}else delArm=id;
     render();return}
+  if(b.getAttribute('data-cp')){var q=document.querySelector('#list [data-e="'+b.getAttribute('data-cp')+'"]');if(!q)return;var t0=$('save').textContent;q.click();editId=null;$('code').value=nextCode();$('save').textContent=t0;toast('کپی شد و کد جدید گرفت. نام و قیمت را بررسی کنید.');return}
   if(b.getAttribute('data-e')){
     id=b.getAttribute('data-e');it=items.filter(function(x){return x.id===id})[0];if(!it)return;
     tab('c');
@@ -518,15 +521,19 @@ function renderH(){
      '<div class="d">'+esc(e.d)+' • تعداد '+e.n+' • قیمت فروش هر عدد '+F(e.p)+(e.dc?' (با تخفیف '+F(e.dc)+')':'')+'</div>'+
      '<div class="d">'+zl(e.z)+'</div>'+(meta?'<div class="d">'+meta+'</div>':'')+
      '<div class="d">مبلغ فروش '+F(rev)+' • کارمزد '+F(e.n*feu(e))+' • هزینه خرید '+F(e.n*e.c)+'</div>'+(e.rn?'<div class="d" style="color:var(--warn)">برگشتی: '+e.rn+' عدد</div>':'');
-    if(e.n>0)r+='<div class="a"><button data-r="'+id+'">'+(retArm===e.id?'بستن':'مرجوعی')+'</button></div>';
+    r+='<div class="a"><button data-iv="'+id+'">فاکتور</button><label style="margin:0;display:flex;align-items:center;gap:6px;color:var(--text)"><input type="checkbox" data-ivc="'+id+'"'+(ivSel[e.id]?' checked':'')+' style="width:22px;height:22px;padding:0">برای فاکتور مشترک</label></div>';if(e.n>0)r+='<div class="a"><button data-r="'+id+'">'+(retArm===e.id?'بستن':'مرجوعی')+'</button></div>';
     if(retArm===e.id)r+='<div class="sell"><div class="lbl">تعداد برگشتی از هر سایز</div>'+Object.keys(e.z).map(function(k){var q=k.split('|');return '<div class="sr"><span>'+esc(q[0]+(q[1]?' '+q[1]:''))+' (حداکثر '+e.z[k]+')</span><input class="n" data-rk="'+esc(k)+'" inputmode="numeric" placeholder="0"></div>'}).join('')+'<div class="err" id="rm"></div><div class="btns"><button class="p" data-rok="'+id+'">ثبت مرجوعی</button></div></div>';
     return r+'</div>'}).join('');
   if(tot>L.length)h+='<div class="empty">فقط ۴۰ فروش آخر نشان داده شد؛ برای بقیه جستجو کن.</div>';
-  o.innerHTML=h;
+  o.innerHTML=ivBar()+h;
 }
 $('hq').oninput=function(){sq=nz(this.value);renderH()};
+$('hOut').onchange=function(e){var t=e.target;if(t.hasAttribute&&t.hasAttribute('data-ivc')){var k=t.getAttribute('data-ivc');if(t.checked)ivSel[k]=1;else delete ivSel[k];renderH()}};
 $('hOut').oninput=function(e){var t=e.target;if(t.hasAttribute('data-rk')){var l=lat(t.value);if(l!==t.value)t.value=l}};
 $('hOut').onclick=function(e){var b=e.target.closest('button');if(!b)return;var id;
+  if(b.hasAttribute('data-iv')){invoice([b.getAttribute('data-iv')]);return}
+  if(b.hasAttribute('data-ivm')){invoice(Object.keys(ivSel));return}
+  if(b.hasAttribute('data-ivx')){ivSel={};renderH();return}
   if(b.hasAttribute('data-r')){id=b.getAttribute('data-r');retArm=retArm===id?null:id;renderH();return}
   if(b.hasAttribute('data-rok')){id=b.getAttribute('data-rok');var en=log.filter(function(x){return x.id===id})[0];if(!en)return;
     var it=items.filter(function(x){return x.id===en.iid})[0],rs={},c=0,bad=null;
@@ -685,18 +692,66 @@ $('rs').onclick=function(){$('rf').click()};
 $('rf').onchange=function(){
   var f=this.files[0];if(!f)return;var rd=new FileReader();
   rd.onload=function(){try{var d=JSON.parse(rd.result);if(!d||!Array.isArray(d.items))throw 0;
-    var ok=d.items.filter(valid),R={},out=[],have={};
-    ok.forEach(function(x){R[x.id]=1;var i=items.findIndex(function(y){return y.id===x.id});if(i>=0)items[i]=x;else items.push(x)});
+    var dup=0,ok=d.items.filter(valid),R={},out=[],have={};
+    ok.forEach(function(x){R[x.id]=1;var i=items.findIndex(function(y){return y.id===x.id});if(i>=0)items[i]=x;else{if(items.some(function(y){return y.code&&String(y.code)===String(x.code)})){x.code=nextCode();dup++}items.push(x)}});
     assignCodes();ok.forEach(function(x){mig(x,out)});
     log=log.filter(function(e){return !R[e.iid]});log.forEach(function(e){have[e.id]=1});
     (Array.isArray(d.log)?d.log:[]).concat(out).filter(validE).forEach(function(e){if(!have[e.id]){have[e.id]=1;log.push(e)}});
-    (Array.isArray(d.exp)?d.exp:[]).forEach(function(x){if(x&&x.id&&x.a>0&&typeof x.d==='string'&&!xp.some(function(y){return y.id===x.id}))xp.push(x)});var dc=(d.cust&&typeof d.cust==='object'&&!Array.isArray(d.cust))?d.cust:{};if(d.v>=6)Object.keys(dc).forEach(function(k){CU[k]=dc[k]});else mc(dc);if(d.set&&typeof d.set==='object'){S=d.set;saveS()}
-    persist();render();renderB();bm('بازیابی شد: '+ok.length+' محصول.',true)}catch(e){bm('این فایل پشتیبان معتبر نیست.',false)}};
+    (Array.isArray(d.exp)?d.exp:[]).forEach(function(x){if(x&&x.id&&x.a>0&&typeof x.d==='string'&&!xp.some(function(y){return y.id===x.id}))xp.push(x)});var dc=(d.cust&&typeof d.cust==='object'&&!Array.isArray(d.cust))?d.cust:{};if(d.v>=6)Object.keys(dc).forEach(function(k){CU[k]=dc[k]});else mc(dc);if(d.set&&typeof d.set==='object'&&!Object.keys(S).length){S=d.set;saveS()}
+    persist();render();renderB();if(dup)setTimeout(function(){toast(dup+' محصول کد تکراری داشت و کد جدید گرفت.')},400);bm('بازیابی شد: '+ok.length+' محصول.',true)}catch(e){bm('این فایل پشتیبان معتبر نیست.',false)}};
   rd.readAsText(f);this.value='';
 };
 function pst(){try{if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().then(function(g){$('ps').textContent=g?'ذخیره‌سازی دائمی فعال است و مرورگر داده‌ها را خودکار پاک نمی‌کند.':'ذخیره‌سازی دائمی هنوز تأیید نشده. بعد از نصب برنامه و چند بار استفاده فعال می‌شود؛ تا آن موقع پشتیبان بگیر.'})}}catch(e){}}
 pst();
 clearForm();render();bkWarn();idbLoad();
+
+// ---- فاکتور و ظاهر (v8) ----
+
+function bsHtml(){var a=items.map(function(it){var n=0;Object.keys(it.sold||{}).forEach(function(k){n+=it.sold[k]});return [it,n]}).sort(function(x,y){return y[1]-x[1]});if(a.length<2)return '';
+  var li=function(l){return l.map(function(x){return '<div class="rg" style="grid-template-columns:1fr auto"><span>'+esc(x[0].name)+' <span class="cd">#'+esc(x[0].code)+'</span></span><b>'+x[1]+'</b></div>'}).join('')};
+  return '<div class="card"><h2>پرفروش‌ها</h2>'+li(a.slice(0,3))+'<h2 style="margin-top:12px">کم‌فروش‌ها</h2>'+li(a.slice(-3).reverse())+'</div>'}
+function drawInvoice(L){
+  var e0=L[0],W=1000,rh=56,FN='sans-serif',G='#0f7b5f',T='#1d2320',M='#6b746f';
+  var info=[['تاریخ',lat(e0.d)],['مشتری',lat([e0.cu,e0.ph].filter(Boolean).join(' - '))||'-']];if(e0.ci)info.push(['شهر',lat(e0.ci)]);
+  var H=130+info.length*40+30,tn=0,tt=0;
+  L.forEach(function(e){H+=64+46+Object.keys(e.z||{}).length*rh+(e.dc?46:0)+30;tn+=e.n;tt+=e.n*e.p});
+  H+=100+90;
+  var c=document.createElement('canvas');c.width=W;c.height=H;var x=c.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,W,H);x.direction='rtl';
+  x.fillStyle=G;x.fillRect(0,0,W,100);
+  x.textAlign='right';x.fillStyle='#fff';x.font='bold 34px '+FN;x.fillText('فاکتور فروش',W-40,63);
+  x.direction='ltr';x.textAlign='left';x.font='bold 30px '+FN;x.fillText('Mahkids',40,63);x.direction='rtl';
+  x.font='21px '+FN;
+  info.forEach(function(r,i){var y=150+i*40;x.textAlign='right';x.fillStyle=M;x.fillText(r[0]+':',W-40,y);x.fillStyle=T;x.fillText(r[1],W-130,y,700)});
+  var y=130+info.length*40+30,cx=[880,700,540,370,170];
+  L.forEach(function(e){
+    var Z=Object.keys(e.z||{}).map(function(k){var q=k.split('|');return {s:lat(q[0]),c:q[1]||'-',n:e.z[k]}}),u=e.dc?(e.lp||e.p):e.p;
+    x.textAlign='right';x.fillStyle=T;x.font='bold 24px '+FN;x.fillText(e.nm||'',W-40,y+34,760);
+    x.direction='ltr';x.textAlign='left';x.fillStyle=M;x.font='20px '+FN;x.fillText('#'+lat(e.cd||'-'),40,y+34);x.direction='rtl';
+    y+=64;x.fillStyle=G;x.fillRect(40,y,W-80,46);x.fillStyle='#fff';x.font='bold 19px '+FN;x.textAlign='center';
+    ['سایز','رنگ','تعداد','قیمت واحد','جمع'].forEach(function(h,i){x.fillText(h,cx[i],y+30)});y+=46;
+    x.font='22px '+FN;
+    Z.forEach(function(r,i){if(i%2==0){x.fillStyle='#f4f7f5';x.fillRect(40,y,W-80,rh)}
+      x.fillStyle=T;[r.s,r.c,String(r.n),F(u),F(r.n*u)].forEach(function(v,j){x.fillText(v,cx[j],y+36,150)});y+=rh});
+    if(e.dc){x.textAlign='right';x.fillStyle=M;x.font='20px '+FN;x.fillText('تخفیف: '+F(e.dc)+' تومان',W-50,y+32);y+=46}
+    y+=30});
+  x.textAlign='right';x.fillStyle=M;x.font='21px '+FN;x.fillText('تعداد کل: '+tn,W-40,y+10);y+=34;
+  x.fillStyle='#e1f2ec';x.fillRect(40,y,W-80,80);x.fillStyle=G;x.font='bold 30px '+FN;
+  x.fillText('جمع کل',W-60,y+52);x.textAlign='left';x.fillText(F(tt)+' تومان',60,y+52);
+  x.textAlign='center';x.fillStyle=M;x.font='19px '+FN;x.fillText('با تشکر از خرید شما',W/2,y+130);
+  return c}
+
+var ivSel={};
+function invoice(ids){var L=ids.map(function(id){return log.filter(function(x){return x.id===id})[0]}).filter(function(e){return e&&e.n>0});
+  if(!L.length){toast('فروش قابل‌چاپ پیدا نشد.');return}
+  var c=drawInvoice(L);
+  c.toBlob(function(b){var f=new File([b],'invoice-'+lat(L[0].cd||'x')+'.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(function(){})}
+    else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;document.body.appendChild(a);a.click();a.remove();toast('فاکتور ذخیره شد.')}},'image/png')}
+function ivBar(){var n=Object.keys(ivSel).length;return n?'<div class="a" style="margin:0 0 10px"><button class="p" data-ivm="1">فاکتور مشترک ('+n+' فروش)</button><button data-ivx="1">لغو انتخاب</button></div>':''}
+function setTh(v,sv){var r=document.documentElement;if(v==='light'||v==='dark')r.setAttribute('data-theme',v);else r.removeAttribute('data-theme');if(sv){try{localStorage.setItem('fc2_th',JSON.stringify(v))}catch(e){}}}
+setTh(ld('fc2_th','auto'));
+$('th0').onclick=function(){setTh('auto',1)};$('th1').onclick=function(){setTh('light',1)};$('th2').onclick=function(){setTh('dark',1)};
 if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
 })();
 </script>
