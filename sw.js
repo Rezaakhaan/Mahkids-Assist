@@ -1,7 +1,7 @@
-/* Mahkids Assist - service worker (v14)
+/* Mahkids Assist - service worker
    استراتژی: «اول کش». برنامه همیشه فوری از حافظه باز می‌شود (حتی با اینترنت ضعیف یا قطع)،
    و نسخهٔ تازه پشت‌صحنه گرفته می‌شود. هیچ‌وقت منتظر شبکه نمی‌ماند. */
-var VER = 'v14';
+var VER = 'v' + (new URL(self.location.href).searchParams.get('v') || '0');   // شماره از index.html (APP_VER) می‌آید
 var CACHE = 'mahkids-assist-' + VER;
 var CORE = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'icon-180.png'];
 var OPTIONAL = ['fonts/Vazirmatn-var.woff2'];   // اگر فایل نبود، نصب خراب نمی‌شود
