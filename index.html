@@ -189,13 +189,28 @@ button.p{border-radius:16px;padding:14px;font-size:17px;background:var(--text);b
 .rk i{width:26px;height:26px;border-radius:9px;background:var(--soft);color:var(--accent);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px}
 .rk span{flex:1}
 
-/* ===== v13 ===== */
+/* ===== v13 ===== */ /* v14: ساخت ضربی، تأیید و نسخهٔ برگشت بازیابی */
 #sb{position:sticky;top:0;z-index:60}
 .sbar{display:flex;align-items:center;justify-content:center;gap:10px;padding:7px 14px;font-size:13.5px;font-weight:600;text-align:center;line-height:1.7}
 .sbar.off{background:#3b4440;color:#fff}.sbar.off.ok{background:var(--accent)}
 .sbar.upd{background:var(--text);color:var(--bg)}
 .sbar button{border:0;border-radius:10px;padding:4px 14px;font-size:13px;font-weight:700;background:var(--accent);color:#fff;flex:none}
 .btns.stk{position:sticky;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:30;margin-top:14px;padding:18px 0 4px;background:linear-gradient(to top,var(--card) 62%,rgba(0,0,0,0))}
+/* ===== v14: ساخت ضربی ===== */
+#addrow,#mkbtn{flex:1 1 0;margin:4px 0 0;background:transparent;border:1.5px solid var(--accent);color:var(--accent);font-weight:700}
+#mkbtn[aria-expanded="true"]{background:var(--soft)}
+.mkp{margin-top:10px;padding:12px;border:1.5px dashed var(--accent);border-radius:16px;background:var(--soft)}
+.mkh{display:flex;justify-content:space-between;align-items:center}
+.mkh button{width:36px;height:36px;padding:0;border-radius:12px;font-size:20px;line-height:1}
+.mkt{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-weight:700;font-size:15px}
+.mkct{display:inline-flex;align-items:center;gap:6px}
+.mkct b{min-width:30px;text-align:center;direction:ltr}
+.mkct button{width:38px;height:38px;padding:0;font-size:20px;line-height:1;border-radius:12px}
+.mkg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.mkg input{min-width:0;font-size:16px;padding:10px 6px;text-align:center}
+.mksm{margin-top:12px;font-weight:700;color:var(--accent);font-size:15px;text-align:center;min-height:26px}
+.mksm.bad{color:var(--warn)}
+#mkgo{width:100%}#mkgo:disabled{opacity:.45}
 </style>
 </head>
 <body>
@@ -220,7 +235,17 @@ button.p{border-radius:16px;padding:14px;font-size:17px;background:var(--text);b
 
   <div class="lbl">سایزها و تعداد هر سایز</div>
   <div id="rows"></div>
-  <div style="display:flex;justify-content:space-between;align-items:center"><button id="addrow" type="button">＋ افزودن سایز</button><span class="tq" id="tqty"></span></div>
+  <div style="display:flex;gap:0 8px;align-items:center;flex-wrap:wrap"><button id="addrow" type="button">＋ افزودن سایز</button><button id="mkbtn" type="button" aria-expanded="false" aria-controls="mk">ساخت ضربی</button><span class="tq" id="tqty" style="flex-basis:100%"></span></div>
+  <div id="mk" class="mkp" hidden>
+    <div class="mkh"><b>ساخت ضربی</b><button type="button" id="mkx" aria-label="بستن">×</button></div>
+    <div class="mkt"><span>سایزها</span><span class="mkct"><button type="button" data-mc="s:-1" aria-label="یک سایز کمتر">−</button><b id="mkns">3</b><button type="button" data-mc="s:1" aria-label="یک سایز بیشتر">+</button></span></div>
+    <div class="mkg" id="mks"></div>
+    <div class="mkt"><span>رنگ‌ها</span><span class="mkct"><button type="button" data-mc="c:-1" aria-label="یک رنگ کمتر">−</button><b id="mknc">3</b><button type="button" data-mc="c:1" aria-label="یک رنگ بیشتر">+</button></span></div>
+    <div class="mkg" id="mkc"></div>
+    <div class="mkt"><span>تعداد برای هر ترکیب</span><span class="mkct"><button type="button" data-mc="q:-1" aria-label="کم">−</button><b id="mkq">3</b><button type="button" data-mc="q:1" aria-label="زیاد">+</button></span></div>
+    <div class="mksm" id="mksum" role="status" aria-live="polite"></div>
+    <div class="btns"><button class="p" id="mkgo" type="button">بساز</button></div>
+  </div>
 
   <div class="seg"><button id="m1" class="on" type="button">قیمت تکی</button><button id="m2" type="button">قیمت کلی</button></div>
   <label id="pl" for="price">قیمت خرید هر عدد (تومان)</label>
@@ -279,6 +304,7 @@ button.p{border-radius:16px;padding:14px;font-size:17px;background:var(--text);b
 <div class="card"><h2>پشتیبان</h2>
 <div class="btns" style="margin-top:0"><button class="p" id="bs" type="button">ارسال به تلگرام / اشتراک‌گذاری</button></div><div class="btns"><button id="bk" type="button">دانلود پشتیبان</button><button id="rs" type="button">بازیابی از فایل (تلگرام …)</button></div><div class="tq" id="bl"></div>
 <input id="rf" type="file" accept=".json,.txt,application/json,text/plain" style="display:none">
+<div class="btns"><button id="snb" type="button" hidden></button></div>
 <div class="tq" id="bm"></div><div class="tq" id="bc"></div><div class="tq" id="ps"></div>
 </div>
 </div>
@@ -457,7 +483,7 @@ function clearForm(){
   ['code','name','color','price','ship','extra'].forEach(function(i){$(i).value=''});['price','ship','extra'].forEach(function(i){fm($(i))});
   $('code').placeholder='خودکار ('+nextCode()+')';
   $('margin').value=S.m!=null?S.m:'20';$('fee').value=S.f!=null?S.f:'15';
-  initDate();setMode('unit');renderRows();$('save').textContent='ذخیره محصول';$('msg').textContent='';calc();
+  initDate();setMode('unit');renderRows();$('save').textContent='ذخیره محصول';$('msg').textContent='';calc();mkReset();
 }
 
 // ---- تاریخچهٔ فروش ----
@@ -533,6 +559,43 @@ function render(){
 $('rows').oninput=function(e){var i=e.target.getAttribute('data-i');if(i==null)return;var k=e.target.getAttribute('data-k');if(k==='q'){var l1=lat(e.target.value);if(l1!==e.target.value)e.target.value=l1}rows[i][k]=e.target.value;$('msg').textContent='';calc()};
 $('rows').onclick=function(e){var st=e.target.getAttribute('data-st');if(st){var a=st.split(':'),i=+a[0],v=num(rows[i].q);v=(isNaN(v)?0:v)+(+a[1]);if(v<0)v=0;rows[i].q=v?String(v):'';e.target.parentNode.querySelector('input').value=rows[i].q;$('msg').textContent='';calc();return}var x=e.target.getAttribute('data-x');if(x==null)return;rows.splice(+x,1);if(!rows.length)rows=[{s:'',c:'',q:''}];renderRows();calc()};
 $('addrow').onclick=function(){rows.push({s:'',c:'',q:''});renderRows()};
+// ---- ساخت ضربی (v14) ----
+var MK={s:['','',''],c:['','',''],q:3},MKMAX=60;
+function mkList(a){var seen={},out=[];a.forEach(function(v){var t=String(v==null?'':v).trim();if(!t)return;var k=nz(t);if(seen[k])return;seen[k]=1;out.push(t)});return out}
+function mkCalc(){var sl=mkList(MK.s),cl=mkList(MK.c),n=Math.max(sl.length,1)*Math.max(cl.length,1);return {S:sl,C:cl,n:n,tot:n*MK.q,empty:!sl.length&&!cl.length,over:n>MKMAX}}
+function mkSum(){var r=mkCalc(),t,bad=false;
+  if(r.empty){t='سایز یا رنگی وارد نشده است.';bad=true}
+  else if(r.over){t='سقف '+F(MKMAX)+' ترکیب است؛ الان '+F(r.n)+' ترکیب می‌شود. سایز یا رنگ را کمتر کن.';bad=true}
+  else{var a=[];if(r.S.length)a.push(F(r.S.length)+' سایز');if(r.C.length)a.push(F(r.C.length)+' رنگ');t=a.join(' × ')+' = '+F(r.n)+' ردیف، جمعاً '+F(r.tot)+' عدد'}
+  $('mksum').textContent=t;$('mksum').className='mksm'+(bad?' bad':'');$('mkgo').disabled=bad}
+function mkDraw(){
+  ['s','c'].forEach(function(k){
+    $('mk'+k).innerHTML=MK[k].map(function(v,i){return '<input data-mk="'+k+'" data-i="'+i+'" placeholder="'+(k==='s'?'سایز':'رنگ')+'" value="'+esc(v)+'" autocomplete="off" aria-label="'+(k==='s'?'سایز ':'رنگ ')+(i+1)+'">'}).join('');
+    $('mkn'+k).textContent=MK[k].length});
+  $('mkq').textContent=MK.q;mkSum()}
+function mkShow(on){$('mk').hidden=!on;$('mkbtn').setAttribute('aria-expanded',on?'true':'false')}
+function mkReset(){MK={s:['','',''],c:['','',''],q:3};mkShow(false);mkDraw()}
+$('mkbtn').onclick=function(){var on=$('mk').hidden;mkShow(on);if(on){mkDraw();try{$('mk').scrollIntoView({block:'nearest',behavior:'smooth'})}catch(e){}}};
+$('mkx').onclick=function(){mkShow(false)};
+$('mk').oninput=function(e){var k=e.target.getAttribute('data-mk');if(!k)return;MK[k][+e.target.getAttribute('data-i')]=e.target.value;mkSum()};
+$('mk').onclick=function(e){var b=e.target.closest?e.target.closest('[data-mc]'):null;if(!b)return;
+  var a=b.getAttribute('data-mc').split(':'),k=a[0],d=+a[1];
+  if(k==='q')MK.q=Math.min(999,Math.max(1,MK.q+d));
+  else{var L=MK[k],n=L.length+d;if(n<1||n>12)return;if(d>0)L.push('');else L.pop()}
+  mkDraw()};
+$('mkgo').onclick=function(){
+  var r=mkCalc();if(r.empty||r.over)return;
+  var sl=r.S.length?r.S:[''],cl=r.C.length?r.C:[''],idx={},add=0,mer=0;
+  var key=function(s,c){return (nz(s)||'-')+'|'+nz(c)};
+  rows=rows.filter(function(x){return (x.s||'').trim()||(x.c||'').trim()||String(x.q==null?'':x.q).trim()});
+  rows.forEach(function(x,i){var k=key(x.s,x.c);if(!(k in idx))idx[k]=i});
+  sl.forEach(function(s){cl.forEach(function(c){var k=key(s,c);
+    if(k in idx){var o=rows[idx[k]],v=num(o.q);o.q=String((isNaN(v)?0:v)+MK.q);mer++}
+    else{rows.push({s:s,c:c,q:String(MK.q)});idx[k]=rows.length-1;add++}})});
+  renderRows();calc();$('msg').textContent='';mkReset();
+  toast(add&&mer?F(add)+' ردیف اضافه شد و تعداد '+F(mer)+' ترکیب موجود زیاد شد':add?F(add)+' ردیف اضافه شد':'تعداد '+F(mer)+' ترکیب موجود زیاد شد');
+  try{$('rows').scrollIntoView({block:'nearest',behavior:'smooth'})}catch(e){}
+};
 $('m1').onclick=function(){setMode('unit')};$('m2').onclick=function(){setMode('total')};
 $('repbtn').onclick=function(){showRep=!showRep;$('repbtn').textContent=showRep?'بستن گزارش':'گزارش موجودی کل';render()};
 $('reset').onclick=clearForm;
@@ -837,8 +900,24 @@ $('ex3').onclick=function(){var R=[['تاریخ','نوع','مبلغ','توضیح
 
 // ---- پشتیبان ----
 function bm(t,ok){var e=$('bm');e.textContent=t;e.style.color=ok?'var(--accent)':'var(--warn)'}
-function renderB(){$('bc').textContent=items.length+' محصول • '+log.length+' فروش • '+xp.length+' هزینه ثبت‌شده';$('sl').value=thr();$('sw').value=stW();renderCh();pst();bl();phInfo();ofl();fnt()}
-function mkBackup(){return JSON.stringify({v:6,items:items,log:log,exp:xp,cust:CU,set:S})}
+function renderB(){snapUi();$('bc').textContent=items.length+' محصول • '+log.length+' فروش • '+xp.length+' هزینه ثبت‌شده';$('sl').value=thr();$('sw').value=stW();renderCh();pst();bl();phInfo();ofl();fnt()}
+function mkBackup(){return JSON.stringify({v:6,ts:Date.now(),items:items,log:log,exp:xp,cust:CU,set:S})}
+// نسخهٔ نگهدارِ اطلاعات فعلی، درست قبل از هر بازیابی (v14)
+function snapSave(){var o={v:6,ts:Date.now(),items:items,log:log,exp:xp,cust:CU};
+  try{localStorage.setItem('fc2_snap',JSON.stringify(o));localStorage.setItem('fc2_snapts',String(o.ts));return true}catch(e){}
+  try{o.items=items.map(stripImg);localStorage.setItem('fc2_snap',JSON.stringify(o));localStorage.setItem('fc2_snapts',String(o.ts));return true}catch(e){}
+  try{localStorage.removeItem('fc2_snap');localStorage.removeItem('fc2_snapts')}catch(e){}
+  return false}
+function snapUi(){var b=$('snb');if(!b)return;var t=+ld('fc2_snapts',0);if(!(t>0)){b.hidden=true;return}b.hidden=false;b.textContent='برگرداندن به قبل از آخرین بازیابی ('+fromTs(t)+')'}
+function snapUndo(){
+  var s=ld('fc2_snap',null);if(!s||!Array.isArray(s.items)){toast('نسخهٔ قبلی پیدا نشد.',1);try{localStorage.removeItem('fc2_snapts')}catch(e){}snapUi();return}
+  var sl=Array.isArray(s.log)?s.log.filter(validE):[],si=s.items.filter(valid);
+  if(!confirm('اطلاعات فعلی با نسخهٔ قبل از بازیابی ('+fromTs(s.ts)+') جایگزین می‌شود:\n'+si.length+' محصول، '+sl.length+' فروش.\nفروش‌ها و تغییرهایی که بعد از بازیابی ثبت کرده‌ای از بین می‌رود. ادامه بدهم؟'))return;
+  items=si;items.forEach(function(x){if(!x.img&&phSaved[String(x.id)])x.img=phSaved[String(x.id)]});
+  log=sl;xp=Array.isArray(s.exp)?s.exp:[];CU=(s.cust&&typeof s.cust==='object'&&!Array.isArray(s.cust))?s.cust:{};
+  if(!persist())return;
+  try{localStorage.removeItem('fc2_snap');localStorage.removeItem('fc2_snapts')}catch(e){}
+  render();renderB();snapUi();bm('به نسخهٔ قبل از بازیابی برگشتی.',true)}
 function bname(){return 'backup-'+todayStr().replace(/\//g,'-')+'.json'}
 function markBackup(){S.lb=Date.now();saveS();bkWarn();var e=$('bl');if(e)bl()}
 function bl(){var e=$('bl');if(!e)return;e.textContent=S.lb?'آخرین پشتیبان: '+fromTs(S.lb)+' ('+Math.floor((Date.now()-S.lb)/864e5)+' روز پیش)':'هنوز پشتیبان نگرفته‌ای.'}
@@ -859,17 +938,30 @@ function shareBk(){
 }
 $('bs').onclick=shareBk;
 $('bkgo').onclick=function(){tab('b');shareBk()};
-$('rs').onclick=function(){$('rf').click()};
+$('rs').onclick=function(){$('rf').click()};$('snb').onclick=snapUndo;
 $('rf').onchange=function(){
   var f=this.files[0];if(!f)return;var rd=new FileReader();
   rd.onload=function(){try{var d=JSON.parse(rd.result);if(!d||!Array.isArray(d.items))throw 0;
     var dup=0,ok=d.items.filter(valid),R={},out=[],have={};
+    // --- تأیید قبل از بازیابی + نگه‌داشتن نسخهٔ اطلاعات فعلی (v14) ---
+    var bL=Array.isArray(d.log)?d.log:[],bX=Array.isArray(d.exp)?d.exp:[],bid={};
+    bL.forEach(function(e){if(e&&e.id)bid[e.id]=1});ok.forEach(function(x){R[x.id]=1});
+    var rpl=ok.filter(function(x){return items.some(function(y){return y.id===x.id})}).length;
+    var lost=log.filter(function(e){return R[e.iid]&&!bid[e.id]}).length;
+    var bts=+d.ts>0?+d.ts:0,bd=bts?fromTs(bts):(f.lastModified?fromTs(f.lastModified)+' (تاریخ فایل)':'نامشخص');
+    var cm=['بازیابی از فایل پشتیبان','','تاریخ پشتیبان: '+bd,'داخل فایل: '+ok.length+' محصول، '+bL.length+' فروش، '+bX.length+' هزینه','اطلاعات فعلی: '+items.length+' محصول، '+log.length+' فروش، '+xp.length+' هزینه'];
+    if(rpl||lost)cm.push('');
+    if(rpl)cm.push('• '+rpl+' محصول فعلی با نسخهٔ داخل فایل جایگزین می‌شود.');
+    if(lost)cm.push('• '+lost+' فروش ثبت‌شدهٔ فعلی که در این فایل نیست حذف می‌شود.');
+    cm.push('','قبل از بازیابی یک نسخه از اطلاعات فعلی نگه داشته می‌شود تا بتوانی برگردانی. ادامه بدهم؟');
+    if(!confirm(cm.join('\n'))){bm('بازیابی لغو شد؛ چیزی تغییر نکرد.',false);return}
+    if(!snapSave()&&!confirm('نگه‌داشتن نسخهٔ اطلاعات فعلی ممکن نشد (حافظهٔ مرورگر پر است).\nبهتر است اول «دانلود پشتیبان» را بزنی. بدون نسخهٔ برگشت ادامه بدهم؟')){bm('بازیابی لغو شد؛ چیزی تغییر نکرد.',false);return}
     ok.forEach(function(x){R[x.id]=1;var i=items.findIndex(function(y){return y.id===x.id});if(i>=0)items[i]=x;else{if(items.some(function(y){return y.code&&String(y.code)===String(x.code)})){x.code=nextCode();dup++}items.push(x)}});
     assignCodes();ok.forEach(function(x){mig(x,out)});
     log=log.filter(function(e){return !R[e.iid]});log.forEach(function(e){have[e.id]=1});
     (Array.isArray(d.log)?d.log:[]).concat(out).filter(validE).forEach(function(e){if(!have[e.id]){have[e.id]=1;log.push(e)}});
     (Array.isArray(d.exp)?d.exp:[]).forEach(function(x){if(x&&x.id&&x.a>0&&typeof x.d==='string'&&!xp.some(function(y){return y.id===x.id}))xp.push(x)});var dc=(d.cust&&typeof d.cust==='object'&&!Array.isArray(d.cust))?d.cust:{};if(d.v>=6)Object.keys(dc).forEach(function(k){CU[k]=dc[k]});else mc(dc);if(d.set&&typeof d.set==='object'&&!Object.keys(S).length){S=d.set;saveS()}
-    persist();render();renderB();if(dup)setTimeout(function(){toast(dup+' محصول کد تکراری داشت و کد جدید گرفت.')},400);bm('بازیابی شد: '+ok.length+' محصول.',true)}catch(e){bm('این فایل پشتیبان معتبر نیست.',false)}};
+    persist();render();renderB();if(dup)setTimeout(function(){toast(dup+' محصول کد تکراری داشت و کد جدید گرفت.')},400);else toast('بازیابی شد',0,{t:'برگردان',f:snapUndo});bm('بازیابی شد: '+ok.length+' محصول. اگر اشتباه بود، دکمهٔ «برگرداندن» پایین‌تر هست.',true)}catch(e){bm('این فایل پشتیبان معتبر نیست.',false)}};
   rd.readAsText(f);this.value='';
 };
 function pst(){try{if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().then(function(g){$('ps').textContent=g?'ذخیره‌سازی دائمی فعال است و مرورگر داده‌ها را خودکار پاک نمی‌کند.':'ذخیره‌سازی دائمی هنوز تأیید نشده. بعد از نصب برنامه و چند بار استفاده فعال می‌شود؛ تا آن موقع پشتیبان بگیر.'})}}catch(e){}}
